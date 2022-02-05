@@ -1,5 +1,35 @@
 {% extends "network/layout.html" %}
 
+{% load static %} 
+
+{% block static %}
+    <script defer src="{% static 'network/inbox.js' %}?{% now 'U' %}"></script>
+    <link
+    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+    crossorigin="anonymous"
+    />
+{% endblock %}
+
 {% block body %}
-    TODO
+    {% if user.is_authenticated %}
+        <form class="container-xl border" id="newPostForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="newPost">New Post:</label>
+                <textarea class="form-control" id="newPost" name="content" required rows="3"></textarea>
+                <p id="error"></p>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    {% endif %}
+
+    <div class="container">
+        <div class="row">
+            {% for post in posts %}
+                {% include "network/post.html" %}
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}

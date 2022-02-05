@@ -1,21 +1,43 @@
+from importlib.resources import contents
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.contrib.auth import (
-    REDIRECT_FIELD_NAME, get_user_model, login as auth_login,
-    logout as auth_logout, update_session_auth_hash,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 # Class Base Views
+from django.views import View
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView
 
-from .models import User
+from .models import User, Post
 
 
 class IndexView(TemplateView):
     template_name = "network/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        posts = Post.objects.all()[:10]
+        context["posts"] = posts
+        return context
+
+
+class ComposePostView(LoginRequiredMixin, View):
+    def post(self, request):
+        data = json.loads(request.body)
+        content = data.get("content")
+        if content.strip() == "":
+            return JsonResponse({"error": "Your post can't be empty!"}, status=400)
+        post = Post.objects.create(user=request.user, content=content)
+        post.save()
+        return JsonResponse(post.serialize(), safe=False)
+
+    # Composing a new post must be via POST
+    def get(self, request):
+        return JsonResponse({"error": "POST request required."}, status=400)
 
 
 def login_view(request):
