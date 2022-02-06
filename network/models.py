@@ -8,6 +8,13 @@ from django.db import models
 class User(AbstractUser):
     pass
 
+    def get_following_users(self):
+        """ Return a list of following user for user_"""
+        followings_user = []
+        for following in self.followings.all():
+            followings_user.append(following.user_followed)
+        return followings_user
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(

@@ -15,6 +15,7 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView
 from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 
 
 from .models import User, Post, UserProfile, Following
@@ -58,10 +59,10 @@ class UserProfileView(DetailView):
         # Check if user is followed or not
         context["followed"] = False
         for following in user_.followers.all():
-             if following.user == self.request.user:
-                 context["followed"] = True
-                 break
-        
+            if following.user == self.request.user:
+                context["followed"] = True
+                break
+
         context["followings"] = user_.followings.all().count()
         context["followers"] = user_.followers.all().count()
         context["user_posts"] = user_posts
@@ -114,6 +115,18 @@ def login_view(request):
             })
     else:
         return render(request, "network/login.html")
+
+
+class FollowingUserPostsView(LoginRequiredMixin, ListView):
+    template_name = "network/following-user-post.html"
+    context_object_name = "posts"
+
+    # paginate_by =
+
+    def get_queryset(self):
+        qs = Post.objects.filter(
+            user__in=self.request.user.get_following_users())
+        return qs
 
 
 def logout_view(request):

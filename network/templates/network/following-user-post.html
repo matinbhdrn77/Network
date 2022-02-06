@@ -1,0 +1,10 @@
+{% extends 'network/layout.html' %}
+
+
+{% block body %}
+
+{% for post in posts %}
+    {% include 'network/post.html' %}
+{% endfor %}
+
+{% endblock %}
