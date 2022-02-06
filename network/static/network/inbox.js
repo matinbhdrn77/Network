@@ -5,7 +5,6 @@ const newPost = document.querySelector("#newPost");
 
 // Clear Fields
 errorField.textContent = "";
-newPost.value = "";
 
 // Find csrfToken
 function getCookie(name) {
@@ -86,6 +85,7 @@ const submit_form = function (e) {
       </div>
        `;
         postsContainer.insertAdjacentHTML("afterbegin", html);
+        newPost.value = "";
       }
     });
 };

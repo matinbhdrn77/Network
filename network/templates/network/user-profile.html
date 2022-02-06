@@ -1,0 +1,67 @@
+{% extends "network/layout.html" %}
+
+{% load static %}
+
+{% block static %}
+    <script defer src="{% static 'network/profile.js' %}?{% now 'U' %}"></script>
+    <link href="{% static 'network/profile.css' %}?{% now 'U' %}" rel="stylesheet">
+    <link
+    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+    crossorigin="anonymous"
+    />
+{% endblock %} 
+
+{% block body %}
+
+<div class="padding">
+    <div class="col-md-8">
+        <!-- Column -->
+        <div class="card padding-bottom--small"> <img class="card-img-top" src="https://static.vecteezy.com/system/resources/previews/002/597/614/non_2x/abstract-dark-hexagon-pattern-on-red-neon-background-technology-style-modern-futuristic-geometric-shape-web-banner-design-you-can-use-for-cover-template-poster-flyer-print-ad-illustration-vector.jpg" alt="Card image cap">
+            <div class="card-body little-profile text-center">
+                <div class="pro-img"><img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="user"></div>
+                <h3 class="m-b-0">
+                    {% if user_profile.name %}
+                        {{ user_profile.name }}
+                    {% else %}
+                        {{ user_profile }}
+                    {% endif %}
+                </h3>
+
+                {% if user.id != user_profile.id and user.is_authenticated %}
+                    <button id="followBtn" class="m-t-10 waves-effect waves-dark btn btn-primary btn-md btn-rounded" data-profile-id={{ user_profile.id }}>
+                        {% if followed %}
+                            Unfollow
+                        {% else %}
+                            Follow
+                        {% endif %}
+                    </button>
+                {% endif %}
+                <div class="row text-center m-t-20">
+                    <div class="col-lg-4 col-md-4 m-t-20">
+                        <h3 class="m-b-0 font-light">{{ num_posts }}</h3><small>Posts</small>
+                    </div>
+                    <div class="col-lg-4 col-md-4 m-t-20">
+                        <h3 class="m-b-0 font-light" id="num_followers">{{ followers }}</h3><small>Followers</small>
+                    </div>
+                    <div class="col-lg-4 col-md-4 m-t-20">
+                        <h3 class="m-b-0 font-light" id="num_following">{{ followings }}</h3><small>Following</small>
+                    </div>
+                </div>
+            </div>
+            <!--Show User Posts-->
+            <div class="container">
+                <div class="center"> 
+                    <div class="row">
+                        {% for post in user_posts %}
+                            {% include "network/post.html" %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
