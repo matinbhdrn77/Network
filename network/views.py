@@ -2,13 +2,13 @@ from distutils.debug import DEBUG
 from importlib.resources import contents
 import json
 from re import template
-from urllib import request
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 
 # Class Base Views
 from django.views import View
@@ -23,11 +23,20 @@ from .models import User, Post, UserProfile, Following
 
 class IndexView(TemplateView):
     template_name = "network/index.html"
+    
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        posts = Post.objects.all()[:10]
-        context["posts"] = posts
+        posts = Post.objects.all()
+        
+        # Create page controll
+        paginator = Paginator(posts, 10)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context["page_obj"] = page_obj
+
         return context
 
 
@@ -55,6 +64,10 @@ class UserProfileView(DetailView):
         context = super().get_context_data(**kwargs)
         user_ = get_object_or_404(User, id=self.kwargs.get('pk'))
         user_posts = Post.objects.filter(user=user_)
+        # Create page controll
+        paginator = Paginator(user_posts, 10)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
         # Check if user is followed or not
         context["followed"] = False
@@ -65,8 +78,9 @@ class UserProfileView(DetailView):
 
         context["followings"] = user_.followings.all().count()
         context["followers"] = user_.followers.all().count()
-        context["user_posts"] = user_posts
+        context["page_obj"] = page_obj
         context["num_posts"] = user_posts.count()
+        context["is_prof"] = True
         return context
 
 
@@ -97,6 +111,17 @@ class HandleFollowingView(LoginRequiredMixin, View):
             return JsonResponse({"action": "unfollowed", "followers": num_followers - 1}, status=200)
 
 
+class FollowingUserPostsView(LoginRequiredMixin, ListView):
+    template_name = "network/following-user-post.html"
+    context_object_name = "posts"
+    paginate_by = 10
+
+    def get_queryset(self):
+        qs = Post.objects.filter(
+            user__in=self.request.user.get_following_users())
+        return qs
+
+
 def login_view(request):
     if request.method == "POST":
 
@@ -115,18 +140,6 @@ def login_view(request):
             })
     else:
         return render(request, "network/login.html")
-
-
-class FollowingUserPostsView(LoginRequiredMixin, ListView):
-    template_name = "network/following-user-post.html"
-    context_object_name = "posts"
-
-    # paginate_by =
-
-    def get_queryset(self):
-        qs = Post.objects.filter(
-            user__in=self.request.user.get_following_users())
-        return qs
 
 
 def logout_view(request):

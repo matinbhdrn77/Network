@@ -50,12 +50,14 @@
     <div class="container">
         <div class="center"> 
             <div class="row">
-                {% for post in user_posts %}
+                {% for post in page_obj.object_list %}
                     {% include "network/post.html" %}
                 {% endfor %}
             </div>
         </div>
     </div>
+
 </div>
+{% include 'network/paginator.html' %}
 
 {% endblock %}

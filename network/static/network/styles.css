@@ -37,3 +37,7 @@ form {
 .media-comment {
     margin-top:20px
 }
+
+.margin--top{
+    margin-top: 2em;
+}
