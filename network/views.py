@@ -1,7 +1,5 @@
 from distutils.debug import DEBUG
-from importlib.resources import contents
 import json
-from re import template
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -23,13 +21,11 @@ from .models import User, Post, UserProfile, Following
 
 class IndexView(TemplateView):
     template_name = "network/index.html"
-    
-
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         posts = Post.objects.all()
-        
+
         # Create page controll
         paginator = Paginator(posts, 10)
         page_number = self.request.GET.get('page')
@@ -42,13 +38,13 @@ class IndexView(TemplateView):
 
 class ComposePostView(LoginRequiredMixin, View):
     def post(self, request):
-        data = json.loads(request.body)
-        content = data.get("content")
-        if content.strip() == "":
-            return JsonResponse({"error": "Your post can't be empty!"}, status=400)
-        post = Post.objects.create(user=request.user, content=content)
-        post.save()
-        return JsonResponse(post.serialize(), safe=False)
+        content = request.POST.get("content")
+        if content == '':
+            return render(request, "network/index.html", {
+                "error": "Your post can't be empty!"
+            })
+        new_post = Post.objects.create(user = request.user, content = content)
+        return HttpResponseRedirect(reverse('index'))
 
     # Composing a new post must be via POST
     def get(self, request):
@@ -64,6 +60,7 @@ class UserProfileView(DetailView):
         context = super().get_context_data(**kwargs)
         user_ = get_object_or_404(User, id=self.kwargs.get('pk'))
         user_posts = Post.objects.filter(user=user_)
+
         # Create page controll
         paginator = Paginator(user_posts, 10)
         page_number = self.request.GET.get('page')
@@ -120,6 +117,26 @@ class FollowingUserPostsView(LoginRequiredMixin, ListView):
         qs = Post.objects.filter(
             user__in=self.request.user.get_following_users())
         return qs
+
+
+class EditeFormView(View):
+    def post(self, request, pk):
+        post = get_object_or_404(Post, id=pk)
+        print(post)
+        # Check The post user editing post or not
+        if post.user != self.request.user:
+            print('first error')
+            return JsonResponse({"error": "You can't edite someone else post!"}, status=400)
+
+        data = json.loads(request.body)
+        print(data)
+        content = data.get("content")
+        if content.strip() == "":
+            print("second eror")
+            return JsonResponse({"error": "Your post can't be empty!"}, status=400)
+        post.content = content
+        post.save()
+        return JsonResponse({"content":post.content}, status=200)
 
 
 def login_view(request):

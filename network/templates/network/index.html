@@ -8,7 +8,7 @@
 
 {% block body %}
     {% if user.is_authenticated %}
-        <form class="container-xl border" id="newPostForm">
+        <form class="container-xl border" id="newPostForm" action="{% url 'new-post' %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="newPost">New Post:</label>

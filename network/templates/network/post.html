@@ -1,4 +1,4 @@
-<div class="col-md-8">
+<div class="col-md-8" id="post">
   <div class="media g-mb-30 media-comment">
     {% if not is_prof %}
       <img
@@ -15,7 +15,13 @@
         <span class="g-color-gray-dark-v4 g-font-size-12">{{ post.date }}</span>
       </div>
 
-      <p>{{ post.content }}</p>
+      <p id="content">{{ post.content }}</p>
+      <form id="contentForm" style="display:none">
+        {% csrf_token %}
+        <textarea name="content" cols="60" rows="4">{{ post.content }}</textarea>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <p id="error"></p>
+      </form>
 
       <ul class="list-inline d-sm-flex my-0">
         <li class="list-inline-item g-mr-20">
@@ -41,8 +47,10 @@
         {% if user.is_authenticated and user.id == post.user.id %}
           <li class="list-inline-item g-mr-20">
             <a
+              id="edite-btn"
               class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover"
-              href="#!"
+              href=""
+              data-post-id={{ post.id }}
             >
               Edite
             </a>

@@ -21,6 +21,7 @@
       crossorigin="anonymous"
     />
     {% block static %}{% endblock %}
+    <script defer src="{% static 'network/post.js' %}?{% now 'U' %}"></script>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
