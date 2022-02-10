@@ -7,7 +7,7 @@ let contentEl;
 const submit_edited_form = function (e) {
   e.preventDefault();
   const csrftoken = getCookie("csrftoken");
-  console.log(contentFormEl)
+  
   fetch("/edite-form/" + parseInt(postId), {
     method: "POST",
     body: JSON.stringify({
@@ -43,4 +43,4 @@ const editePost = function (e) {
   contentFormEl.addEventListener("submit", submit_edited_form.bind(this));
 };
 
-editeBtn.addEventListener("click", editePost);
+editeBtn?.addEventListener("click", editePost);

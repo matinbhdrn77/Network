@@ -2,8 +2,10 @@
 
 {% load static %} 
 
+{% load network_extras %}
+
 {% block static %}
-    <script defer src="{% static 'network/inbox.js' %}?{% now 'U' %}"></script>
+    
 {% endblock %}
 
 {% block body %}

@@ -1,5 +1,8 @@
+{% load network_extras %}
 <div class="col-md-8" id="post">
   <div class="media g-mb-30 media-comment">
+
+    <!--if we are in user profile => don't show user image near every post-->
     {% if not is_prof %}
       <img
         class="d-flex g-width-50 g-height-50 rounded-circle g-mt-3 g-mr-15"
@@ -7,6 +10,7 @@
         alt="Profile Image"
       />
     {% endif %}
+
     <div class="media-body u-shadow-v18 g-bg-secondary g-pa-30">
       <div class="g-mb-15">
         <h5 class="h5 g-color-gray-dark-v1 mb-0">
@@ -15,6 +19,7 @@
         <span class="g-color-gray-dark-v4 g-font-size-12">{{ post.date }}</span>
       </div>
 
+      <!-- Content of the post and a hiden form for editing post -->
       <p id="content">{{ post.content }}</p>
       <form id="contentForm" style="display:none">
         {% csrf_token %}
@@ -23,50 +28,45 @@
         <p id="error"></p>
       </form>
 
-      <ul class="list-inline d-sm-flex my-0">
-        <li class="list-inline-item g-mr-20">
-          <a
-            class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover"
-            href="#!"
-          >
-            <i class="fa fa-thumbs-up g-pos-rel g-top-1 g-mr-3"></i>
-            {{ post.like }}
-          </a>
-        </li>
-        <li class="list-inline-item g-mr-20">
-          <a
-            class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover"
-            href="#!"
-          >
-            <i class="fa fa-thumbs-down g-pos-rel g-top-1 g-mr-3"></i>
-            {{ post.dislike }}
-          </a>
-        </li>
+      <!-- Liske and Dislike -->
+      {% if user.is_authenticated %}
+        <ul class="list-inline d-sm-flex my-0">
+          <li class="list-inline-item g-mr-20" id="like" data-post-id="{{ post.id }}">
+            <a
+              class="u-link-v5 g-color-{% if post.id|is_liked:user.id %}primary{% else %}gray{% endif %}-dark-v4 g-color-primary--hover"
+              href="#!"
+            >
+              <i class="fa fa-thumbs-up g-pos-rel g-top-1 g-mr-3">{{ post.num_likes }}</i>
+            </a>
+          </li>
+          <li class="list-inline-item g-mr-20" id="dislike" data-post-id="{{ post.id }}">
+            <a
+              class="u-link-v5 g-color-{% if post.id|is_disliked:user.id %}primary{% else %}gray{% endif %}-dark-v4 g-color-primary--hover"
+              href="#!"
+            >
+              <i class="fa fa-thumbs-down g-pos-rel g-top-1 g-mr-3">{{ post.num_dislikes }}</i>
+            </a>
+          </li>
+        </ul>
+      {% endif %}
 
-        <!--Edite Link-->
+        <!--Edite Post (if it's your post)-->
         {% if user.is_authenticated and user.id == post.user.id %}
-          <li class="list-inline-item g-mr-20">
+          <li class="list-inline-item ml-auto">
             <a
               id="edite-btn"
               class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover"
               href=""
               data-post-id={{ post.id }}
             >
+              <i class="fa fa-pencil g-pos-rel g-top-1 g-mr-3"></i>
               Edite
             </a>
           </li>
         {% endif %}
 
-        <li class="list-inline-item ml-auto">
-          <a
-            class="u-link-v5 g-color-gray-dark-v4 g-color-primary--hover"
-            href="#!"
-          >
-            <i class="fa fa-reply g-pos-rel g-top-1 g-mr-3"></i>
-            Reply
-          </a>
-        </li>
       </ul>
     </div>
   </div>
 </div>
+

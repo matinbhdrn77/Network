@@ -21,6 +21,7 @@
       crossorigin="anonymous"
     />
     {% block static %}{% endblock %}
+    <script defer src="{% static 'network/inbox.js' %}?{% now 'U' %}"></script>
     <script defer src="{% static 'network/post.js' %}?{% now 'U' %}"></script>
   </head>
   <body>

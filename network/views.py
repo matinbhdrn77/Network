@@ -14,6 +14,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.views import LoginView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
+from matplotlib.pyplot import cla
 
 
 from .models import User, Post, UserProfile, Following
@@ -122,22 +123,63 @@ class FollowingUserPostsView(LoginRequiredMixin, ListView):
 class EditeFormView(View):
     def post(self, request, pk):
         post = get_object_or_404(Post, id=pk)
-        print(post)
+
         # Check The post user editing post or not
         if post.user != self.request.user:
             print('first error')
             return JsonResponse({"error": "You can't edite someone else post!"}, status=400)
 
         data = json.loads(request.body)
-        print(data)
         content = data.get("content")
         if content.strip() == "":
-            print("second eror")
             return JsonResponse({"error": "Your post can't be empty!"}, status=400)
         post.content = content
         post.save()
         return JsonResponse({"content":post.content}, status=200)
 
+class LikeDislikeView(LoginRequiredMixin,View):
+    def post(self, requset, pk, action):
+        post = get_object_or_404(Post, id=pk)
+
+        # Handle liking a post
+        if action == "like":
+            # if like => unlike else => like
+            if requset.user.is_like(post):
+                # unlike
+                post.likes.remove(requset.user)
+            else:
+                # user couldn't like and dislike a post(must be toggle between them)
+                if requset.user.is_dislike(post):
+                    post.dislikes.remove(requset.user)
+                post.likes.add(requset.user)
+            
+            return JsonResponse({
+                "num_likes": post.num_likes(),
+                "num_dislikes": post.num_dislikes(),
+                "is_like": requset.user.is_like(post),
+                "is_dislike": requset.user.is_dislike(post)
+                })
+        
+        # Handle disliking a post
+        if action == "dislike":
+            # if dislike => undislike else => dislike
+            if requset.user.is_dislike(post):
+                # undislike
+                post.dislikes.remove(requset.user)
+            else:
+                # user couldn't like and dislike a post(must be toggle between them)
+                if requset.user.is_like(post):
+                    post.likes.remove(requset.user)
+                post.dislikes.add(requset.user)
+            
+            return JsonResponse({
+                "num_likes": post.num_likes(),
+                "num_dislikes": post.num_dislikes(),
+                "is_like": requset.user.is_like(post),
+                "is_dislike": requset.user.is_dislike(post)
+                })
+                
+        
 
 def login_view(request):
     if request.method == "POST":
